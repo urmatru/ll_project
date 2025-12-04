@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-w269b7$2v%gqc-1i*ot1kk42&!jzhecn5=98l^w%3zj76gq69@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['.platformsh.site']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -132,27 +132,14 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-from platformshconfig import Config
-config = Config()
+import os
+import dj_database_url 
 
-if config.is_valid_platform():
-    ALLOWED_HOSTS.append('.platformsh.site')
+DATABASES = {
+    'default': dj_database_url.config(
+        default='sqlite:///db.sqlite3'
+    )
+}
 
-    if config.appDir:
-        STATIC_ROOT = Path(config.appDir) / 'static'
-
-    if config.projectEntropy:
-        SECRET_KEY = config.projectEntropy
-
-    if not config.in_build():
-        db_settings = config.credentials('database')
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': db_settings['path'],
-                'USER': db_settings['username'],
-                'PASSWORD': db_settings['password'],
-                'HOST': db_settings['host'],
-                'PORT': db_settings['port'],
-            }
-        }
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static'
